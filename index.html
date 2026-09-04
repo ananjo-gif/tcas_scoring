@@ -1,4 +1,3 @@
-
 <title>คำนวณคะแนน TCAS โควตา มมส</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
 <style>
@@ -349,6 +348,71 @@
     text-align:center;
   }
 
+  /* ---- toast: brief bottom-of-screen nudge, e.g. "press calculate first" ---- */
+  .toast{
+    position:fixed;
+    left:50%;
+    bottom:26px;
+    z-index:220;
+    max-width:calc(100vw - 32px);
+    padding:12px 18px;
+    border-radius:999px;
+    background:var(--accent);
+    color:var(--accent-ink);
+    font-size:13px;
+    font-weight:600;
+    text-align:center;
+    box-shadow:var(--shadow);
+    transform:translate(-50%, 12px);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease;
+  }
+  .toast.show{
+    opacity:1;
+    transform:translate(-50%, 0);
+  }
+  .toast.toast-rich{
+    max-width:min(420px, calc(100vw - 32px));
+    padding:14px 18px;
+    border-radius:16px;
+    text-align:left;
+  }
+  .toast-title{
+    font-size:13px;
+    font-weight:700;
+    margin-bottom:6px;
+  }
+  .toast-prog{
+    font-size:12.5px;
+    font-weight:600;
+    opacity:.92;
+    margin-bottom:8px;
+  }
+  .toast-subjects-label{
+    font-size:11.5px;
+    font-weight:600;
+    opacity:.85;
+    margin-bottom:5px;
+  }
+  .toast-chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:5px;
+  }
+  .toast-chip{
+    display:inline-flex;
+    align-items:center;
+    padding:2px 9px;
+    border-radius:999px;
+    background:rgba(255,255,255,.2);
+    border:1px solid rgba(255,255,255,.35);
+    color:inherit;
+    font-weight:600;
+    font-size:11px;
+    white-space:nowrap;
+  }
+
   .card-head{
     display:flex;
     align-items:baseline;
@@ -359,6 +423,11 @@
   .card-head h2{
     font-size:17px;
     margin:0;
+  }
+  .h2-note{
+    font-size:12.5px;
+    font-weight:500;
+    color:var(--ink-dim);
   }
   .card-head .hint{
     font-size:12px;
@@ -447,6 +516,23 @@
     margin-bottom:6px;
   }
   .calc-pending svg{ color:var(--accent); margin-bottom:8px; }
+  .incomplete-notice{
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+    padding:11px 13px;
+    margin-bottom:16px;
+    border-radius:10px;
+    background:var(--warn-soft);
+    border:1px solid color-mix(in srgb, var(--warn) 40%, var(--line));
+    color:var(--warn);
+    font-size:12.5px;
+    font-weight:600;
+    line-height:1.9;
+  }
+  .incomplete-notice svg{ flex-shrink:0; margin-top:2px; color:var(--warn); }
+  .incomplete-notice-text{ margin-right:2px; }
+  .incomplete-notice .missing-chip{ margin:0 2px 2px 0; }
 
   .subject-group{
     margin-bottom:14px;
@@ -513,7 +599,7 @@
     color:var(--ink);
     font-size:14px;
     font-variant-numeric:tabular-nums;
-    text-align:right;
+    text-align:center;
     font-family:inherit;
   }
   .field-row input:focus{
@@ -534,9 +620,70 @@
     color:var(--ink);
     font-size:14px;
     font-family:inherit;
-    margin-bottom:6px;
   }
   .search-box:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+
+  .prog-search-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:6px;
+  }
+  .prog-search-row .search-box{
+    flex:2 1 220px;
+    min-width:0;
+    margin-bottom:0;
+  }
+  .faculty-select{
+    flex:1 1 160px;
+    min-width:0;
+    max-width:100%;
+    padding:10px 12px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--surface-2);
+    color:var(--ink);
+    font-size:13.5px;
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .faculty-select:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+  .clear-filter-btn{
+    flex:0 0 auto;
+    padding:10px 14px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--ink-dim);
+    font-size:13px;
+    font-weight:600;
+    font-family:inherit;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:border-color .12s ease, color .12s ease;
+  }
+  .clear-filter-btn:hover{ border-color:var(--accent); color:var(--accent); }
+
+  .compare-head-right{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .compare-clear-btn{
+    padding:6px 12px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--ink-dim);
+    font-size:12px;
+    font-weight:600;
+    font-family:inherit;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:border-color .12s ease, color .12s ease;
+  }
+  .compare-clear-btn:hover{ border-color:var(--warn); color:var(--warn); }
 
   .round-toggle{
     display:flex;
@@ -560,10 +707,48 @@
     border-color:var(--accent);
     color:var(--accent-ink);
   }
+  .round-count{
+    font-size:11px;
+    font-weight:500;
+    opacity:.75;
+  }
+
+  .prog-filter-tabs{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:6px;
+    margin-bottom:10px;
+  }
+  .prog-filter-tabs button{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:7px 12px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--ink-dim);
+    font-family:inherit;
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background .12s ease, border-color .12s ease, color .12s ease;
+  }
+  .prog-filter-tabs button:hover{ border-color:var(--accent); color:var(--accent); }
+  .prog-filter-tabs button.active{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:var(--accent-ink);
+  }
+  .prog-filter-tabs button .pf-count{
+    font-variant-numeric:tabular-nums;
+    opacity:.85;
+  }
+  .prog-filter-tabs button[data-filter="complete"]:not(.active){ color:var(--st-good); border-color:color-mix(in srgb, var(--st-good) 45%, var(--line)); }
+  .prog-filter-tabs button[data-filter="incomplete"]:not(.active){ color:var(--warn); border-color:color-mix(in srgb, var(--warn) 45%, var(--line)); }
 
   .prog-list{
-    max-height:300px;
-    overflow-y:auto;
     border:1px solid var(--line);
     border-radius:10px;
   }
@@ -583,6 +768,13 @@
   }
   .prog-item-main{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
   .prog-item .pname{ font-size:13.5px; font-weight:600; color:var(--ink); }
+  .pname-chance{ font-weight:700; font-size:12.5px; white-space:nowrap; }
+  .pname-chance.tier-0{ color:var(--st-critical); }
+  .pname-chance.tier-1{ color:var(--st-serious); }
+  .pname-chance.tier-2{ color:#8a6200; }
+  .pname-chance.tier-3{ color:var(--st-good); }
+  :root:not([data-theme="light"]) .pname-chance.tier-2{ color:#f0c96b; }
+  :root[data-theme="dark"] .pname-chance.tier-2{ color:#f0c96b; }
   .prog-item .pmeta{ font-size:11.5px; color:var(--ink-dim); }
   .prog-item .pcode{
     font-variant-numeric:tabular-nums;
@@ -605,12 +797,74 @@
   }
   .pin-btn:hover{ background:var(--surface); border-color:var(--line); color:var(--gold); }
   .pin-btn.pinned{ color:var(--gold); }
+  .pin-btn:disabled{ color:var(--line); cursor:not-allowed; }
+  .pin-btn:disabled:hover{ background:transparent; border-color:transparent; color:var(--line); }
+  .prog-item .pmeta-warn{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:4px;
+    font-size:11.5px;
+    font-weight:600;
+    color:var(--warn);
+    margin-top:4px;
+  }
+  .missing-chip{
+    display:inline-flex;
+    align-items:center;
+    padding:2px 9px;
+    border-radius:999px;
+    background:color-mix(in srgb, var(--accent) 15%, var(--surface));
+    color:var(--accent);
+    font-weight:600;
+    font-size:11px;
+    white-space:nowrap;
+  }
   .hint.limit-note{ color:var(--warn); font-weight:600; }
   .empty-note{
     padding:16px 12px;
     font-size:13px;
     color:var(--ink-dim);
     text-align:center;
+  }
+
+  .prog-pagination{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    margin-top:10px;
+  }
+  .prog-pagination button{
+    min-width:30px;
+    height:30px;
+    padding:0 8px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--ink);
+    font-family:inherit;
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    font-variant-numeric:tabular-nums;
+  }
+  .prog-pagination button:hover:not(:disabled){ border-color:var(--accent); color:var(--accent); }
+  .prog-pagination button.active{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:var(--accent-ink);
+    cursor:default;
+  }
+  .prog-pagination button:disabled{
+    opacity:.4;
+    cursor:not-allowed;
+  }
+  .prog-pagination .pg-ellipsis{
+    color:var(--ink-dim);
+    font-size:12.5px;
+    padding:0 2px;
   }
 
   .selected-banner{
@@ -874,17 +1128,35 @@
   }
   .dtree-figure svg{ display:block; width:100%; max-width:560px; height:auto; margin:0 auto; }
   .dtree-node-fill{ fill:var(--surface); }
-  .dtree-node-stroke{ stroke:currentColor; stroke-width:1.5; opacity:.55; }
+  .dtree-node-stroke{ stroke:currentColor; stroke-width:1.5; opacity:.4; }
   .dtree-node-stroke.active{ opacity:1; stroke-width:2.5; }
-  .dtree-edge{ stroke:currentColor; stroke-width:1.5; opacity:.45; fill:none; }
-  .dtree-edge.active{ opacity:1; stroke-width:2.5; }
+  .dtree-edge{ stroke:currentColor; stroke-width:1.5; opacity:.32; fill:none; }
+  .dtree-edge.active{ opacity:1; stroke-width:3; }
+  .dtree-edge-label{ font-size:10px; fill:var(--ink-dim); }
+  .dtree-edge-label.active{ font-weight:800; fill:currentColor; }
   .dtree-label{ font-size:11px; fill:currentColor; }
   .dtree-label.muted{ fill:var(--ink-dim); }
-  .dtree-edge-label{ font-size:10px; fill:var(--ink-dim); }
   .dtree-value{ font-size:12px; font-weight:700; fill:currentColor; }
+  .dtree-leaf-fill{ stroke-width:1; opacity:.4; }
+  .dtree-leaf-fill.active{ stroke-width:3.5; opacity:1; }
+  .dtree-leaf-fill:not(.active){ fill:var(--surface-2); stroke:currentColor; stroke-opacity:.35; }
+  .dtree-leaf-fill.tier-0.active{ fill:color-mix(in srgb, var(--st-critical) 22%, var(--surface)); stroke:var(--st-critical); }
+  .dtree-leaf-fill.tier-1.active{ fill:color-mix(in srgb, var(--st-serious) 22%, var(--surface)); stroke:var(--st-serious); }
+  .dtree-leaf-fill.tier-2.active{ fill:color-mix(in srgb, var(--st-warning) 28%, var(--surface)); stroke:var(--st-warning); }
+  .dtree-leaf-fill.tier-3.active{ fill:color-mix(in srgb, var(--st-good) 22%, var(--surface)); stroke:var(--st-good); }
+  .dtree-leaf-ring{ stroke-width:1.5; stroke-dasharray:2.5 2.5; opacity:.65; }
   .dtree-leaf-glyph{ font-size:15px; font-weight:700; }
+  .dtree-leaf-glyph:not(.active){ fill:var(--ink-dim) !important; opacity:.55; }
   .dtree-leaf-label{ font-size:11.5px; font-weight:700; }
+  .dtree-leaf-label:not(.active){ fill:var(--ink-dim) !important; opacity:.55; }
   .dtree-leaf-label.active{ font-weight:800; }
+  .tier-0-text{ fill:var(--st-critical); }
+  .tier-1-text{ fill:var(--st-serious); }
+  .tier-2-text{ fill:#8a6200; }
+  .tier-3-text{ fill:var(--st-good); }
+  :root:not([data-theme="light"]) .tier-2-text{ fill:#f0c96b; }
+  :root[data-theme="dark"] .tier-2-text{ fill:#f0c96b; }
+  .dtree-result-tag{ font-size:10px; font-weight:800; letter-spacing:.01em; }
   figcaption.dtree-caption{
     margin-top:8px;
     font-size:12px;
@@ -1250,7 +1522,7 @@
 
   <div class="card" id="overview-card">
     <div class="card-head">
-      <h2>ภาพรวมโอกาสผ่านการคัดเลือกแยกตามผลการวิเคราะห์โอกาส</h2>
+      <h2>ภาพรวมโอกาสผ่านการคัดเลือกแยกตามผลการวิเคราะห์โอกาส <span class="h2-note">(แสดงผลเฉพาะสาขาวิชาที่มีองค์ประกอบคะแนนครบ)</span></h2>
       <span class="hint" id="overview-hint"></span>
     </div>
     <div id="overview-body"></div>
@@ -1259,7 +1531,10 @@
   <div class="card" id="compare-card" hidden>
     <div class="card-head">
       <h2>เปรียบเทียบสาขาที่สนใจ</h2>
-      <span class="hint" id="compare-hint"></span>
+      <span class="compare-head-right">
+        <span class="hint" id="compare-hint"></span>
+        <button type="button" class="compare-clear-btn" id="compare-clear-btn">ล้างการเปรียบเทียบทั้งหมด</button>
+      </span>
     </div>
     <p class="compare-sub">กดไอคอน ★ ที่รายการสาขาด้านล่างเพื่อเพิ่มเข้าตารางเปรียบเทียบนี้ (สูงสุด 4 สาขา)</p>
     <div id="compare-body"></div>
@@ -1291,8 +1566,14 @@
           <span class="hint" id="prog-count-hint"></span>
         </div>
         <div class="round-toggle" id="round-toggle"></div>
-        <input type="text" class="search-box" id="prog-search" placeholder="ค้นหาชื่อสาขา, คณะ หรือรหัสสาขา...">
+        <div class="prog-filter-tabs" id="prog-filter-tabs"></div>
+        <div class="prog-search-row">
+          <input type="text" class="search-box" id="prog-search" placeholder="ค้นหาชื่อสาขา, คณะ หรือรหัสสาขา...">
+          <select class="faculty-select" id="faculty-select" aria-label="กรองตามคณะ"></select>
+          <button type="button" class="clear-filter-btn" id="clear-filter-btn">ล้างตัวกรอง</button>
+        </div>
         <div class="prog-list" id="prog-list"></div>
+        <div class="prog-pagination" id="prog-pagination"></div>
       </div>
 
       <div class="card" id="result-card">
@@ -1339,6 +1620,8 @@
     <div class="loading-label">กำลังคำนวณคะแนนและวิเคราะห์โอกาส...</div>
   </div>
 </div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 window.__WEIGHTS__ = {"subjects": ["tgat", "tgat1", "tgat2", "tgat3", "tpat2", "tpat21", "tpat22", "tpat23", "tpat3", "tpat4", "tpat5", "a_lv_61", "a_lv_64", "a_lv_65", "a_lv_66", "a_lv_70", "a_lv_81", "a_lv_82", "a_lv_86", "a_lv_87"], "rows": [{"round": 2.2, "code": "0301", "name": "พย.บ. พยาบาลศาสตร์", "faculty": "คณะพยาบาลศาสตร์", "plan": "114", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 10, 10, 20, 0, 10, 20, 0, 0]}, {"round": 2.2, "code": "0103", "name": "วท.บ. ฉุกเฉินการแพทย์", "faculty": "คณะแพทยศาสตร์", "plan": "40", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 10, 10, 15, 0, 10, 15, 0, 0]}, {"round": 2.2, "code": "0201", "name": "ภ.บ. การบริบาลทางเภสัชกรรม", "faculty": "คณะเภสัชศาสตร์", "plan": "96", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 15, 15, 15, 10, 10, 15, 0, 0]}, {"round": 2.2, "code": "1405", "name": "ศศ.บ. ภาษาอังกฤษธุรกิจ", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "47", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [0, 40, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0]}, {"round": 2.2, "code": "0102", "name": "พทป.บ. การแพทย์แผนไทยประยุกต์บัณฑิต", "faculty": "คณะแพทยศาสตร์", "plan": "50", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 10, 10, 15, 0, 0, 15, 0, 0]}, {"round": 2.2, "code": "0402", "name": "วท.บ. โภชนาการและการกำหนดอาหาร", "faculty": "คณะสาธารณสุขศาสตร์", "plan": "100", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [0, 10, 10, 10, 0, 0, 0, 0, 10, 0, 0, 10, 0, 20, 20, 0, 0, 10, 0, 0]}, {"round": 2.2, "code": "0404", "name": "วท.บ. อาชีวอนามัยและความปลอดภัย", "faculty": "คณะสาธารณสุขศาสตร์", "plan": "100", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [0, 10, 10, 10, 0, 0, 0, 0, 20, 0, 0, 10, 10, 10, 10, 0, 0, 10, 0, 0]}, {"round": 2.2, "code": "1001", "name": "วศ.บ. วิศวกรรมศาสตร์", "faculty": "คณะวิศวกรรมศาสตร์", "plan": "65", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [25, 0, 0, 0, 0, 0, 0, 0, 25, 0, 0, 40, 0, 0, 0, 0, 0, 10, 0, 0]}, {"round": 2.2, "code": "1002", "name": "วศ.บ. วิศวกรรมโยธา", "faculty": "คณะวิศวกรรมศาสตร์", "plan": "62", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [25, 0, 0, 0, 0, 0, 0, 0, 25, 0, 0, 40, 0, 0, 0, 0, 0, 10, 0, 0]}, {"round": 2.2, "code": "1003", "name": "วศ.บ. วิศวกรรมเครื่องกล", "faculty": "คณะวิศวกรรมศาสตร์", "plan": "62", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [25, 0, 0, 0, 0, 0, 0, 0, 25, 0, 0, 40, 0, 0, 0, 0, 0, 10, 0, 0]}, {"round": 2.2, "code": "1004", "name": "วศ.บ. วิศวกรรมชีวภาพและอาหาร", "faculty": "คณะวิศวกรรมศาสตร์", "plan": "61", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [25, 0, 0, 0, 0, 0, 0, 0, 25, 0, 0, 40, 0, 0, 0, 0, 0, 10, 0, 0]}, {"round": 2.2, "code": "1005", "name": "วศ.บ. วิศวกรรมสิ่งแวดล้อม", "faculty": "คณะวิศวกรรมศาสตร์", "plan": "62", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [25, 0, 0, 0, 0, 0, 0, 0, 25, 0, 0, 40, 0, 0, 0, 0, 0, 10, 0, 0]}, {"round": 2.2, "code": "1006", "name": "วศ.บ. วิศวกรรมเมคาทรอนิกส์", "faculty": "คณะวิศวกรรมศาสตร์", "plan": "62", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [25, 0, 0, 0, 0, 0, 0, 0, 25, 0, 0, 40, 0, 0, 0, 0, 0, 10, 0, 0]}, {"round": 2.2, "code": "1007", "name": "วศ.บ. วิศวกรรมไฟฟ้า", "faculty": "คณะวิศวกรรมศาสตร์", "plan": "62", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [25, 0, 0, 0, 0, 0, 0, 0, 25, 0, 0, 40, 0, 0, 0, 0, 0, 10, 0, 0]}, {"round": 2.2, "code": "1008", "name": "วศ.บ. วิศวกรรมรถไฟความเร็วสูง", "faculty": "คณะวิศวกรรมศาสตร์", "plan": "61", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [25, 0, 0, 0, 0, 0, 0, 0, 25, 0, 0, 40, 0, 0, 0, 0, 0, 10, 0, 0]}, {"round": 2.2, "code": "1009", "name": "วศ.บ. วิศวกรรมยานยนต์ไฟฟ้า", "faculty": "คณะวิศวกรรมศาสตร์", "plan": "61", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [25, 0, 0, 0, 0, 0, 0, 0, 25, 0, 0, 40, 0, 0, 0, 0, 0, 10, 0, 0]}, {"round": 2.2, "code": "1010", "name": "วศ.บ. วิศวกรรมการผลิต", "faculty": "คณะวิศวกรรมศาสตร์", "plan": "62", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [25, 0, 0, 0, 0, 0, 0, 0, 25, 0, 0, 40, 0, 0, 0, 0, 0, 10, 0, 0]}, {"round": 2.2, "code": "1802", "name": "กศ.บ. ดนตรีศึกษา", "faculty": "วิทยาลัยดุริยางคศิลป์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [20, 0, 0, 0, 0, 0, 35, 0, 0, 0, 35, 0, 0, 0, 0, 0, 0, 10, 0, 0]}, {"round": 2.2, "code": "1411", "name": "ศศ.บ. ภาษาตะวันออก (ภาษาเกาหลี)", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [0, 40, 20, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0]}, {"round": 2.2, "code": "1406", "name": "ศศ.บ. ภาษาจีน", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "50", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 40]}, {"round": 2.1, "code": "0401", "name": "ส.บ. สาธารณสุขศาสตร์", "faculty": "คณะสาธารณสุขศาสตร์", "plan": "100", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0402", "name": "วท.บ. โภชนาการและการกำหนดอาหาร", "faculty": "คณะสาธารณสุขศาสตร์", "plan": "100", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [0, 25, 25, 20, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0403", "name": "วท.บ. อนามัยสิ่งแวดล้อม", "faculty": "คณะสาธารณสุขศาสตร์", "plan": "100", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [0, 25, 25, 20, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0404", "name": "วท.บ. อาชีวอนามัยและความปลอดภัย", "faculty": "คณะสาธารณสุขศาสตร์", "plan": "100", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [0, 25, 25, 20, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0501", "name": "วท.บ. เคมี", "faculty": "คณะวิทยาศาสตร์", "plan": "150", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0502", "name": "วท.บ. ชีววิทยา", "faculty": "คณะวิทยาศาสตร์", "plan": "150", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0503", "name": "วท.บ. ฟิสิกส์", "faculty": "คณะวิทยาศาสตร์", "plan": "50", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0504", "name": "วท.บ. ฟิสิกส์ประยุกต์", "faculty": "คณะวิทยาศาสตร์", "plan": "30", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0505", "name": "วท.บ. คณิตศาสตร์", "faculty": "คณะวิทยาศาสตร์", "plan": "80", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [70, 0, 0, 0, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0506", "name": "วท.บ. สถิติ", "faculty": "คณะวิทยาศาสตร์", "plan": "40", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0507", "name": "วท.บ. จุลชีววิทยา", "faculty": "คณะวิทยาศาสตร์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0508", "name": "วท.บ. พันธุศาสตร์โมเลกุล", "faculty": "คณะวิทยาศาสตร์", "plan": "30", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0509", "name": "วท.บ. นวัตกรรมทางชีวเคมี", "faculty": "คณะวิทยาศาสตร์", "plan": "45", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0510", "name": "กศ.บ. ฟิสิกส์", "faculty": "คณะวิทยาศาสตร์", "plan": "30", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [35, 0, 0, 0, 0, 0, 0, 0, 35, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0511", "name": "วท.บ. พลังงานและการควบคุมระบบอัตโนมัติ", "faculty": "คณะวิทยาศาสตร์", "plan": "30", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0512", "name": "วท.บ. ฟิสิกส์ และ วท.ม ฟิสิกส์ (หลักสูตร 2 ปริญญา)", "faculty": "คณะวิทยาศาสตร์", "plan": "5", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0513", "name": "วท.บ. ฟิสิกส์ และ กศ.ม. หลักสูตรและการสอน (หลักสูตร 2 ปริญญา)", "faculty": "คณะวิทยาศาสตร์", "plan": "5", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0601", "name": "วท.บ. เทคโนโลยีการอาหารและโภชนาการ", "faculty": "คณะเทคโนโลยี", "plan": "120", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0602", "name": "วท.บ. เทคโนโลยีชีวภาพและอุตสาหกรรมชีวภาพ", "faculty": "คณะเทคโนโลยี", "plan": "40", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0603", "name": "วท.บ. เกษตรศาสตร์ (วิชาเอกพืชสวน)", "faculty": "คณะเทคโนโลยี", "plan": "50", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0604", "name": "วท.บ. เกษตรศาสตร์ (วิชาเอกพืชไร่)", "faculty": "คณะเทคโนโลยี", "plan": "50", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0605", "name": "วท.บ. พัฒนาผลิตภัณฑ์อาหาร", "faculty": "คณะเทคโนโลยี", "plan": "100", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0606", "name": "วท.บ. สัตวศาสตร์", "faculty": "คณะเทคโนโลยี", "plan": "30", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [60, 0, 0, 0, 0, 0, 0, 0, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0701", "name": "สพ.บ. สัตวแพทยศาสตร์ (หลักสูตร 6 ปี)", "faculty": "คณะสัตวแพทยศาสตร์", "plan": "55", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [40, 0, 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0702", "name": "วท.บ. การพยาบาลสัตว์", "faculty": "คณะสัตวแพทยศาสตร์", "plan": "100", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [40, 0, 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0703", "name": "วท.บ. เทคนิคการสัตวแพทย์", "faculty": "คณะสัตวแพทยศาสตร์", "plan": "100", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [40, 0, 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0801", "name": "วท.บ. เทคโนโลยีสิ่งแวดล้อม", "faculty": "คณะสิ่งแวดล้อมและทรัพยากรศาสตร์", "plan": "100", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0802", "name": "วท.บ. การจัดการทรัพยากรธรรมชาติและสิ่งแวดล้อม", "faculty": "คณะสิ่งแวดล้อมและทรัพยากรศาสตร์", "plan": "80", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [70, 0, 0, 0, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0803", "name": "กศ.บ. สิ่งแวดล้อมศึกษาและเกษตรศึกษา", "faculty": "คณะสิ่งแวดล้อมและทรัพยากรศาสตร์", "plan": "90", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0901", "name": "สท.บ. สารสนเทศศาสตร์", "faculty": "คณะวิทยาการสารสนเทศ", "plan": "80", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0902", "name": "วท.บ. เทคโนโลยีสารสนเทศ", "faculty": "คณะวิทยาการสารสนเทศ", "plan": "150", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0903", "name": "วท.บ. วิทยาการคอมพิวเตอร์", "faculty": "คณะวิทยาการสารสนเทศ", "plan": "160", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0904", "name": "วท.บ. สื่อนฤมิต", "faculty": "คณะวิทยาการสารสนเทศ", "plan": "240", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0905", "name": "นศ.บ. นิเทศศาสตร์", "faculty": "คณะวิทยาการสารสนเทศ", "plan": "180", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0906", "name": "วท.บ. เทคโนโลยีนวัตกรรมสำหรับธุรกิจสมัยใหม่", "faculty": "คณะวิทยาการสารสนเทศ", "plan": "30", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0907", "name": "วท.บ. วิทยาการข้อมูลประยุกต์", "faculty": "คณะวิทยาการสารสนเทศ", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0908", "name": "วท.บ. ภูมิสารสนเทศศาสตร์", "faculty": "คณะวิทยาการสารสนเทศ", "plan": "50", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "0909", "name": "วท.บ. วิทยาการคอมพิวเตอร์และเทคโนโลยี (หลักสูตรนานาชาติ)", "faculty": "คณะวิทยาการสารสนเทศ", "plan": "30", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [0, 50, 15, 5, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1001", "name": "วศ.บ. วิศวกรรมศาสตร์", "faculty": "คณะวิศวกรรมศาสตร์", "plan": "65", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1002", "name": "วศ.บ. วิศวกรรมโยธา", "faculty": "คณะวิศวกรรมศาสตร์", "plan": "62", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1003", "name": "วศ.บ. วิศวกรรมเครื่องกล", "faculty": "คณะวิศวกรรมศาสตร์", "plan": "62", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1004", "name": "วศ.บ. วิศวกรรมชีวภาพและอาหาร", "faculty": "คณะวิศวกรรมศาสตร์", "plan": "61", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1005", "name": "วศ.บ. วิศวกรรมสิ่งแวดล้อม", "faculty": "คณะวิศวกรรมศาสตร์", "plan": "62", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1006", "name": "วศ.บ. วิศวกรรมเมคาทรอนิกส์", "faculty": "คณะวิศวกรรมศาสตร์", "plan": "62", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1007", "name": "วศ.บ. วิศวกรรมไฟฟ้า", "faculty": "คณะวิศวกรรมศาสตร์", "plan": "62", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1008", "name": "วศ.บ. วิศวกรรมรถไฟความเร็วสูง", "faculty": "คณะวิศวกรรมศาสตร์", "plan": "61", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1009", "name": "วศ.บ. วิศวกรรมยานยนต์ไฟฟ้า", "faculty": "คณะวิศวกรรมศาสตร์", "plan": "61", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1010", "name": "วศ.บ. วิศวกรรมการผลิต", "faculty": "คณะวิศวกรรมศาสตร์", "plan": "62", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1101", "name": "สถ.บ. สถาปัตยกรรม (หลักสูตร 5 ปี)", "faculty": "คณะสถาปัตยกรรมศาสตร์ ผังเมืองและนฤมิตศิลป์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [30, 0, 0, 0, 0, 0, 0, 0, 0, 70, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1102", "name": "สถ.บ. สถาปัตยกรรมผังเมือง (หลักสูตร 5 ปี)", "faculty": "คณะสถาปัตยกรรมศาสตร์ ผังเมืองและนฤมิตศิลป์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [30, 0, 0, 0, 0, 0, 0, 0, 0, 70, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1103", "name": "สถ.บ. สถาปัตยกรรมภายใน (หลักสูตร 5 ปี)", "faculty": "คณะสถาปัตยกรรมศาสตร์ ผังเมืองและนฤมิตศิลป์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [30, 0, 0, 0, 0, 0, 0, 0, 0, 70, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1104", "name": "ศป.บ. นวัตกรรมการออกแบบ", "faculty": "คณะสถาปัตยกรรมศาสตร์ ผังเมืองและนฤมิตศิลป์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1105", "name": "ภ.สถ.บ. ภูมิสถาปัตยกรรม (หลักสูตร 5 ปี)", "faculty": "คณะสถาปัตยกรรมศาสตร์ ผังเมืองและนฤมิตศิลป์", "plan": "40", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [30, 0, 0, 0, 0, 0, 0, 0, 0, 70, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1106", "name": "ศป.บ. นวัตกรรมการออกแบบ และ กศ.ม. เทคโนโลยีสื่อสารการศึกษา (หลักสูตร 2 ปริญญา)", "faculty": "คณะสถาปัตยกรรมศาสตร์ ผังเมืองและนฤมิตศิลป์", "plan": "10", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1201", "name": "บช.บ. บัญชีบัณฑิต", "faculty": "คณะการบัญชีและการจัดการ", "plan": "1000", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1202", "name": "บธ.บ. การตลาด", "faculty": "คณะการบัญชีและการจัดการ", "plan": "400", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1203", "name": "บธ.บ. การจัดการสมัยใหม่", "faculty": "คณะการบัญชีและการจัดการ", "plan": "500", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1204", "name": "บธ.บ. คอมพิวเตอร์ธุรกิจ", "faculty": "คณะการบัญชีและการจัดการ", "plan": "150", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1205", "name": "บธ.บ. ธุรกิจระหว่างประเทศ (หลักสูตรนานาชาติ)", "faculty": "คณะการบัญชีและการจัดการ", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1206", "name": "บธ.บ. การบริหารการเงิน", "faculty": "คณะการบัญชีและการจัดการ", "plan": "150", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1207", "name": "บธ.บ. ธุรกิจดิจิทัลและระบบสารสนเทศ", "faculty": "คณะการบัญชีและการจัดการ", "plan": "80", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1208", "name": "ศ.บ. เศรษฐศาสตร์ธุรกิจ", "faculty": "คณะการบัญชีและการจัดการ", "plan": "150", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1209", "name": "บธ.บ. การเป็นผู้ประกอบการธุรกิจสมัยใหม่", "faculty": "คณะการบัญชีและการจัดการ", "plan": "80", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1210", "name": "บธ.บ. บริหารธุรกิจและปัญญาประดิษฐ์", "faculty": "คณะการบัญชีและการจัดการ", "plan": "80", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1301", "name": "ศศ.บ. การจัดการการท่องเที่ยวและบริการ", "faculty": "คณะการท่องเที่ยวและการโรงแรม", "plan": "270", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1302", "name": "ศศ.บ. การจัดการโรงแรมและบริการ", "faculty": "คณะการท่องเที่ยวและการโรงแรม", "plan": "270", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1303", "name": "ศศ.บ. การจัดการการท่องเที่ยวและบริการนานาชาติ (หลักสูตรภาษาอังกฤษ)", "faculty": "คณะการท่องเที่ยวและการโรงแรม", "plan": "20", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1304", "name": "ศศ.บ. ศิลปะการปรุงอาหารและการจัดการบริการด้วยไมตรีจิต", "faculty": "คณะการท่องเที่ยวและการโรงแรม", "plan": "45", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1401", "name": "ศศ.บ. ภาษาไทย", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "180", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1402", "name": "ศศ.บ. การสร้างสรรค์คอนเทนต์และนวัตกรรมสื่อดิจิทัล", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "100", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1403", "name": "ศศ.บ. ภาษาอังกฤษ", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [0, 80, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1404", "name": "ศศ.บ. ภาษาอังกฤษเพื่อการสื่อสารนานาชาติ (หลักสูตรนานาชาติ)", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "50", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [0, 80, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1405", "name": "ศศ.บ. ภาษาอังกฤษธุรกิจ", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "47", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [0, 80, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1406", "name": "ศศ.บ. ภาษาจีน", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "50", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [0, 40, 30, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1407", "name": "ศศ.บ. ภาษาตะวันออก (ภาษาญี่ปุ่น)", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [0, 30, 40, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1408", "name": "ศศ.บ. ภาษาฝรั่งเศส", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "50", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1409", "name": "ศศ.บ. ประวัติศาสตร์", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "100", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1410", "name": "ศศ.บ. การพัฒนาชุมชนและสังคม", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "130", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1411", "name": "ศศ.บ. ภาษาตะวันออก (ภาษาเกาหลี)", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [0, 40, 40, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1412", "name": "ศศ.บ. ภาษาและวัฒนธรรมอาเซียน (เขมร)", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "30", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1413", "name": "ศศ.บ. ภาษาและวัฒนธรรมอาเซียน (ลาว)", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "30", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1414", "name": "ศศ.บ. ภาษาและวัฒนธรรมอาเซียน (เวียดนาม)", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "30", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1415", "name": "วท.บ. ภูมิศาสตร์", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1501", "name": "ร.บ. การเมืองการปกครอง", "faculty": "วิทยาลัยการเมืองการปกครอง", "plan": "400", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1502", "name": "ร.บ. รัฐประศาสนศาสตร์", "faculty": "วิทยาลัยการเมืองการปกครอง", "plan": "400", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1503", "name": "ร.บ. ความสัมพันธ์ระหว่างประเทศ", "faculty": "วิทยาลัยการเมืองการปกครอง", "plan": "100", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1504", "name": "ร.บ. การเมืองการปกครอง และ ร.ม. รัฐศาสตร์ (หลักสูตร 2 ปริญญา)", "faculty": "วิทยาลัยการเมืองการปกครอง", "plan": "8", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1505", "name": "ร.บ. รัฐประศาสนศาสตร์ และ ร.ม. รัฐศาสตร์ (หลักสูตร 2 ปริญญา)", "faculty": "วิทยาลัยการเมืองการปกครอง", "plan": "8", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1506", "name": "ร.บ. ความสัมพันธ์ระหว่างประเทศ และ ร.ม. รัฐศาสตร์ (หลักสูตร 2 ปริญญา)", "faculty": "วิทยาลัยการเมืองการปกครอง", "plan": "4", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1601", "name": "กศ.บ. การศึกษา (วิทยาศาสตร์ทั่วไป)", "faculty": "คณะศึกษาศาสตร์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [30, 0, 0, 0, 0, 0, 0, 0, 40, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1603", "name": "กศ.บ. การศึกษา (สังคมศึกษา)", "faculty": "คณะศึกษาศาสตร์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [0, 20, 20, 20, 0, 0, 0, 0, 0, 0, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1604", "name": "กศ.บ. การศึกษา (ภาษาอังกฤษ)", "faculty": "คณะศึกษาศาสตร์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [0, 35, 15, 15, 0, 0, 0, 0, 0, 0, 35, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1605", "name": "กศ.บ. การศึกษา (ภาษาไทย)", "faculty": "คณะศึกษาศาสตร์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1606", "name": "กศ.บ. การศึกษาปฐมวัย", "faculty": "คณะศึกษาศาสตร์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1607", "name": "กศ.บ. เทคโนโลยีการศึกษาและคอมพิวเตอร์ศึกษา", "faculty": "คณะศึกษาศาสตร์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [0, 15, 25, 25, 0, 0, 0, 0, 20, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1608", "name": "วท.บ. จิตวิทยา", "faculty": "คณะศึกษาศาสตร์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1609", "name": "วท.บ. วิทยาศาสตร์การกีฬา", "faculty": "คณะศึกษาศาสตร์", "plan": "100", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1610", "name": "กศ.บ. พลศึกษาและการกีฬา", "faculty": "คณะศึกษาศาสตร์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1701", "name": "ศป.บ. ทัศนศิลป์", "faculty": "คณะศิลปกรรมศาสตร์และวัฒนธรรมศาสตร์", "plan": "80", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [20, 0, 0, 0, 0, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1702", "name": "ศป.บ. ศิลปะการแสดง", "faculty": "คณะศิลปกรรมศาสตร์และวัฒนธรรมศาสตร์", "plan": "80", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1703", "name": "ศป.บ. การออกแบบและพัฒนาผลิตภัณฑ์", "faculty": "คณะศิลปกรรมศาสตร์และวัฒนธรรมศาสตร์", "plan": "80", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [30, 0, 0, 0, 70, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1704", "name": "ศศ.บ. การจัดการวัฒนธรรม", "faculty": "คณะศิลปกรรมศาสตร์และวัฒนธรรมศาสตร์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1801", "name": "ดศ.บ. ดุริยางคศาสตรบัณฑิต", "faculty": "วิทยาลัยดุริยางคศิลป์", "plan": "80", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1802", "name": "กศ.บ. ดนตรีศึกษา", "faculty": "วิทยาลัยดุริยางคศิลป์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [30, 0, 0, 0, 0, 0, 35, 0, 0, 0, 35, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1803", "name": "ดศ.บ. ดุริยางคศาสตรบัณฑิต และ ดศ.ม. ดุริยางคศาสตรมหาบัณฑิต (หลักสูตร 2 ปริญญา 5 ปี)", "faculty": "วิทยาลัยดุริยางคศิลป์", "plan": "10", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1804", "name": "ดศ.บ. ดุริยางคศาสตรบัณฑิต และ บธ.ม. บริหารธุรกิจและนวัตกรรมดิจิทัล (หลักสูตร 2 ปริญญา 5 ปี)", "faculty": "วิทยาลัยดุริยางคศิลป์", "plan": "10", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [50, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.1, "code": "1901", "name": "น.บ. นิติศาสตรบัณฑิต", "faculty": "คณะนิติศาสตร์", "plan": "475", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 1", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0401", "name": "ส.บ. สาธารณสุขศาสตร์", "faculty": "คณะสาธารณสุขศาสตร์", "plan": "100", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0403", "name": "วท.บ. อนามัยสิ่งแวดล้อม", "faculty": "คณะสาธารณสุขศาสตร์", "plan": "100", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [0, 10, 10, 10, 0, 0, 0, 0, 20, 0, 0, 10, 10, 10, 20, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0501", "name": "วท.บ. เคมี", "faculty": "คณะวิทยาศาสตร์", "plan": "150", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0502", "name": "วท.บ. ชีววิทยา", "faculty": "คณะวิทยาศาสตร์", "plan": "150", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [30, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0503", "name": "วท.บ. ฟิสิกส์", "faculty": "คณะวิทยาศาสตร์", "plan": "50", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0504", "name": "วท.บ. ฟิสิกส์ประยุกต์", "faculty": "คณะวิทยาศาสตร์", "plan": "30", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0505", "name": "วท.บ. คณิตศาสตร์", "faculty": "คณะวิทยาศาสตร์", "plan": "80", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [70, 0, 0, 0, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0506", "name": "วท.บ. สถิติ", "faculty": "คณะวิทยาศาสตร์", "plan": "40", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0507", "name": "วท.บ. จุลชีววิทยา", "faculty": "คณะวิทยาศาสตร์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0508", "name": "วท.บ. พันธุศาสตร์โมเลกุล", "faculty": "คณะวิทยาศาสตร์", "plan": "30", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0509", "name": "วท.บ. นวัตกรรมทางชีวเคมี", "faculty": "คณะวิทยาศาสตร์", "plan": "45", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0510", "name": "กศ.บ. ฟิสิกส์", "faculty": "คณะวิทยาศาสตร์", "plan": "30", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [35, 0, 0, 0, 0, 0, 0, 0, 35, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0511", "name": "วท.บ. พลังงานและการควบคุมระบบอัตโนมัติ", "faculty": "คณะวิทยาศาสตร์", "plan": "30", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0512", "name": "วท.บ. ฟิสิกส์ และ วท.ม ฟิสิกส์ (หลักสูตร 2 ปริญญา)", "faculty": "คณะวิทยาศาสตร์", "plan": "5", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0513", "name": "วท.บ. ฟิสิกส์ และ กศ.ม. หลักสูตรและการสอน (หลักสูตร 2 ปริญญา)", "faculty": "คณะวิทยาศาสตร์", "plan": "5", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0601", "name": "วท.บ. เทคโนโลยีการอาหารและโภชนาการ", "faculty": "คณะเทคโนโลยี", "plan": "120", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0602", "name": "วท.บ. เทคโนโลยีชีวภาพและอุตสาหกรรมชีวภาพ", "faculty": "คณะเทคโนโลยี", "plan": "40", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0603", "name": "วท.บ. เกษตรศาสตร์ (วิชาเอกพืชสวน)", "faculty": "คณะเทคโนโลยี", "plan": "50", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0604", "name": "วท.บ. เกษตรศาสตร์ (วิชาเอกพืชไร่)", "faculty": "คณะเทคโนโลยี", "plan": "50", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0605", "name": "วท.บ. พัฒนาผลิตภัณฑ์อาหาร", "faculty": "คณะเทคโนโลยี", "plan": "100", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [50, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0606", "name": "วท.บ. สัตวศาสตร์", "faculty": "คณะเทคโนโลยี", "plan": "30", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [60, 0, 0, 0, 0, 0, 0, 0, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0801", "name": "วท.บ. เทคโนโลยีสิ่งแวดล้อม", "faculty": "คณะสิ่งแวดล้อมและทรัพยากรศาสตร์", "plan": "100", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0802", "name": "วท.บ. การจัดการทรัพยากรธรรมชาติและสิ่งแวดล้อม", "faculty": "คณะสิ่งแวดล้อมและทรัพยากรศาสตร์", "plan": "80", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [70, 0, 0, 0, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0803", "name": "กศ.บ. สิ่งแวดล้อมศึกษาและเกษตรศึกษา", "faculty": "คณะสิ่งแวดล้อมและทรัพยากรศาสตร์", "plan": "90", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0901", "name": "สท.บ. สารสนเทศศาสตร์", "faculty": "คณะวิทยาการสารสนเทศ", "plan": "80", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0902", "name": "วท.บ. เทคโนโลยีสารสนเทศ", "faculty": "คณะวิทยาการสารสนเทศ", "plan": "150", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0903", "name": "วท.บ. วิทยาการคอมพิวเตอร์", "faculty": "คณะวิทยาการสารสนเทศ", "plan": "160", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [40, 0, 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0904", "name": "วท.บ. สื่อนฤมิต", "faculty": "คณะวิทยาการสารสนเทศ", "plan": "240", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0906", "name": "วท.บ. เทคโนโลยีนวัตกรรมสำหรับธุรกิจสมัยใหม่", "faculty": "คณะวิทยาการสารสนเทศ", "plan": "30", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0907", "name": "วท.บ. วิทยาการข้อมูลประยุกต์", "faculty": "คณะวิทยาการสารสนเทศ", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0908", "name": "วท.บ. ภูมิสารสนเทศศาสตร์", "faculty": "คณะวิทยาการสารสนเทศ", "plan": "50", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "0909", "name": "วท.บ. วิทยาการคอมพิวเตอร์และเทคโนโลยี (หลักสูตรนานาชาติ)", "faculty": "คณะวิทยาการสารสนเทศ", "plan": "30", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [0, 50, 15, 5, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1101", "name": "สถ.บ. สถาปัตยกรรม (หลักสูตร 5 ปี)", "faculty": "คณะสถาปัตยกรรมศาสตร์ ผังเมืองและนฤมิตศิลป์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [30, 0, 0, 0, 0, 0, 0, 0, 0, 70, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1102", "name": "สถ.บ. สถาปัตยกรรมผังเมือง (หลักสูตร 5 ปี)", "faculty": "คณะสถาปัตยกรรมศาสตร์ ผังเมืองและนฤมิตศิลป์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [30, 0, 0, 0, 0, 0, 0, 0, 0, 70, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1103", "name": "สถ.บ. สถาปัตยกรรมภายใน (หลักสูตร 5 ปี)", "faculty": "คณะสถาปัตยกรรมศาสตร์ ผังเมืองและนฤมิตศิลป์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [30, 0, 0, 0, 0, 0, 0, 0, 0, 70, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1104", "name": "ศป.บ. นวัตกรรมการออกแบบ", "faculty": "คณะสถาปัตยกรรมศาสตร์ ผังเมืองและนฤมิตศิลป์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1105", "name": "ภ.สถ.บ. ภูมิสถาปัตยกรรม (หลักสูตร 5 ปี)", "faculty": "คณะสถาปัตยกรรมศาสตร์ ผังเมืองและนฤมิตศิลป์", "plan": "40", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [30, 0, 0, 0, 0, 0, 0, 0, 0, 70, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1106", "name": "ศป.บ. นวัตกรรมการออกแบบ และ กศ.ม. เทคโนโลยีสื่อสารการศึกษา (หลักสูตร 2 ปริญญา)", "faculty": "คณะสถาปัตยกรรมศาสตร์ ผังเมืองและนฤมิตศิลป์", "plan": "10", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1201", "name": "บช.บ. บัญชีบัณฑิต", "faculty": "คณะการบัญชีและการจัดการ", "plan": "1000", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1202", "name": "บธ.บ. การตลาด", "faculty": "คณะการบัญชีและการจัดการ", "plan": "400", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1203", "name": "บธ.บ. การจัดการสมัยใหม่", "faculty": "คณะการบัญชีและการจัดการ", "plan": "500", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1204", "name": "บธ.บ. คอมพิวเตอร์ธุรกิจ", "faculty": "คณะการบัญชีและการจัดการ", "plan": "150", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1205", "name": "บธ.บ. ธุรกิจระหว่างประเทศ (หลักสูตรนานาชาติ)", "faculty": "คณะการบัญชีและการจัดการ", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1206", "name": "บธ.บ. การบริหารการเงิน", "faculty": "คณะการบัญชีและการจัดการ", "plan": "150", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1207", "name": "บธ.บ. ธุรกิจดิจิทัลและระบบสารสนเทศ", "faculty": "คณะการบัญชีและการจัดการ", "plan": "80", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1208", "name": "ศ.บ. เศรษฐศาสตร์ธุรกิจ", "faculty": "คณะการบัญชีและการจัดการ", "plan": "150", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1209", "name": "บธ.บ. การเป็นผู้ประกอบการธุรกิจสมัยใหม่", "faculty": "คณะการบัญชีและการจัดการ", "plan": "80", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1210", "name": "บธ.บ. บริหารธุรกิจและปัญญาประดิษฐ์", "faculty": "คณะการบัญชีและการจัดการ", "plan": "80", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1301", "name": "ศศ.บ. การจัดการการท่องเที่ยวและบริการ", "faculty": "คณะการท่องเที่ยวและการโรงแรม", "plan": "270", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1302", "name": "ศศ.บ. การจัดการโรงแรมและบริการ", "faculty": "คณะการท่องเที่ยวและการโรงแรม", "plan": "270", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1303", "name": "ศศ.บ. การจัดการการท่องเที่ยวและบริการนานาชาติ (หลักสูตรภาษาอังกฤษ)", "faculty": "คณะการท่องเที่ยวและการโรงแรม", "plan": "20", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1304", "name": "ศศ.บ. ศิลปะการปรุงอาหารและการจัดการบริการด้วยไมตรีจิต", "faculty": "คณะการท่องเที่ยวและการโรงแรม", "plan": "45", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1401", "name": "ศศ.บ. ภาษาไทย", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "180", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1402", "name": "ศศ.บ. การสร้างสรรค์คอนเทนต์และนวัตกรรมสื่อดิจิทัล", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "100", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1408", "name": "ศศ.บ. ภาษาฝรั่งเศส", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "50", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1409", "name": "ศศ.บ. ประวัติศาสตร์", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "100", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1410", "name": "ศศ.บ. การพัฒนาชุมชนและสังคม", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "130", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1412", "name": "ศศ.บ. ภาษาและวัฒนธรรมอาเซียน (เขมร)", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "30", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1413", "name": "ศศ.บ. ภาษาและวัฒนธรรมอาเซียน (ลาว)", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "30", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1414", "name": "ศศ.บ. ภาษาและวัฒนธรรมอาเซียน (เวียดนาม)", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "30", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1415", "name": "วท.บ. ภูมิศาสตร์", "faculty": "คณะมนุษยศาสตร์และสังคมศาสตร์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1501", "name": "ร.บ. การเมืองการปกครอง", "faculty": "วิทยาลัยการเมืองการปกครอง", "plan": "400", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1502", "name": "ร.บ. รัฐประศาสนศาสตร์", "faculty": "วิทยาลัยการเมืองการปกครอง", "plan": "400", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1503", "name": "ร.บ. ความสัมพันธ์ระหว่างประเทศ", "faculty": "วิทยาลัยการเมืองการปกครอง", "plan": "100", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1504", "name": "ร.บ. การเมืองการปกครอง และ ร.ม. รัฐศาสตร์ (หลักสูตร 2 ปริญญา)", "faculty": "วิทยาลัยการเมืองการปกครอง", "plan": "8", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1505", "name": "ร.บ. รัฐประศาสนศาสตร์ และ ร.ม. รัฐศาสตร์ (หลักสูตร 2 ปริญญา)", "faculty": "วิทยาลัยการเมืองการปกครอง", "plan": "8", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1506", "name": "ร.บ. ความสัมพันธ์ระหว่างประเทศ และ ร.ม. รัฐศาสตร์ (หลักสูตร 2 ปริญญา)", "faculty": "วิทยาลัยการเมืองการปกครอง", "plan": "4", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1602", "name": "กศ.บ. คณิตศาสตร์", "faculty": "คณะศึกษาศาสตร์", "plan": "90", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 35, 35, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1609", "name": "วท.บ. วิทยาศาสตร์การกีฬา", "faculty": "คณะศึกษาศาสตร์", "plan": "100", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1701", "name": "ศป.บ. ทัศนศิลป์", "faculty": "คณะศิลปกรรมศาสตร์และวัฒนธรรมศาสตร์", "plan": "80", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [20, 0, 0, 0, 0, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1702", "name": "ศป.บ. ศิลปะการแสดง", "faculty": "คณะศิลปกรรมศาสตร์และวัฒนธรรมศาสตร์", "plan": "80", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [50, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1703", "name": "ศป.บ. การออกแบบและพัฒนาผลิตภัณฑ์", "faculty": "คณะศิลปกรรมศาสตร์และวัฒนธรรมศาสตร์", "plan": "80", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [30, 0, 0, 0, 70, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1704", "name": "ศศ.บ. การจัดการวัฒนธรรม", "faculty": "คณะศิลปกรรมศาสตร์และวัฒนธรรมศาสตร์", "plan": "60", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1801", "name": "ดศ.บ. ดุริยางคศาสตรบัณฑิต", "faculty": "วิทยาลัยดุริยางคศิลป์", "plan": "80", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [50, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1803", "name": "ดศ.บ. ดุริยางคศาสตรบัณฑิต และ ดศ.ม. ดุริยางคศาสตรมหาบัณฑิต (หลักสูตร 2 ปริญญา 5 ปี)", "faculty": "วิทยาลัยดุริยางคศิลป์", "plan": "10", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [50, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1804", "name": "ดศ.บ. ดุริยางคศาสตรบัณฑิต และ บธ.ม. บริหารธุรกิจและนวัตกรรมดิจิทัล (หลักสูตร 2 ปริญญา 5 ปี)", "faculty": "วิทยาลัยดุริยางคศิลป์", "plan": "10", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [50, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"round": 2.2, "code": "1901", "name": "น.บ. นิติศาสตรบัณฑิต", "faculty": "คณะนิติศาสตร์", "plan": "475", "quota": "โควตาภาคตะวันออกเฉียงเหนือ ครั้งที่ 2", "w": [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}]};
@@ -1471,16 +1754,16 @@ window.__HISTORY__ = [{"round": 2.1, "year": 2566, "code": "0301", "name": "พ�
 
   // weighted total for a program row, using whatever scores are currently entered
   function computeRowResult(row){
-    var total = 0, missing = 0, used = 0;
+    var total = 0, missing = 0, used = 0, missingKeys = [];
     SUBJECTS.forEach(function(key, idx){
       var w = row.w[idx] || 0;
       if(w <= 0) return;
       var score = state.scores[key];
       var hasScore = (score !== undefined && score !== null && score !== "");
       if(hasScore){ total += score * w / 100; used++; }
-      else { missing++; }
+      else { missing++; missingKeys.push(key); }
     });
-    return { total: total, missing: missing, used: used, complete: missing === 0 && used > 0 };
+    return { total: total, missing: missing, used: used, missingKeys: missingKeys, complete: missing === 0 && used > 0 };
   }
 
   var LABELS = {
@@ -1517,9 +1800,13 @@ window.__HISTORY__ = [{"round": 2.1, "year": 2566, "code": "0301", "name": "พ�
     selected: null,
     search: "",
     compare: [],
-    calculated: false
+    calculated: false,
+    progPage: 1,
+    progFilter: "all",
+    facultyFilter: ""
   };
   var COMPARE_LIMIT = 4;
+  var PROG_PAGE_SIZE = 15;
 
   // ---- persistence (per-viewer convenience only) ----
   function loadSaved(){
@@ -1532,10 +1819,10 @@ window.__HISTORY__ = [{"round": 2.1, "year": 2566, "code": "0301", "name": "พ�
           state.round = obj.round || null;
           state.selected = obj.selected || null;
           state.compare = Array.isArray(obj.compare) ? obj.compare.slice(0, COMPARE_LIMIT) : [];
-          // a returning visitor with previously-entered scores already saw
-          // a calculated result last time -- restore that, rather than
-          // forcing them to press the button again for data they already had
-          state.calculated = Object.keys(state.scores).length > 0;
+          // on a fresh page load / browser refresh, always require the user to
+          // press "คำนวณ / วิเคราะห์ผล" again rather than showing a possibly
+          // stale calculated result from a previous visit
+          state.calculated = false;
         }
       }
     }catch(e){ /* ignore */ }
@@ -1583,7 +1870,7 @@ window.__HISTORY__ = [{"round": 2.1, "year": 2566, "code": "0301", "name": "พ�
         input.max = "100";
         input.step = "0.01";
         input.id = "in-" + k;
-        input.placeholder = "0";
+        input.placeholder = "-";
         if(state.scores[k] !== undefined && state.scores[k] !== null){
           input.value = state.scores[k];
           input.classList.add("has-value");
@@ -1604,6 +1891,9 @@ window.__HISTORY__ = [{"round": 2.1, "year": 2566, "code": "0301", "name": "พ�
           }
           state.calculated = false;
           saveState();
+          renderRoundToggle();
+          renderProgFilterTabs();
+          renderProgList();
           renderResult();
           renderOverview();
           renderCompare();
@@ -1623,18 +1913,103 @@ window.__HISTORY__ = [{"round": 2.1, "year": 2566, "code": "0301", "name": "พ�
     el.innerHTML = "";
     if(state.round === null) state.round = rounds[0];
     rounds.forEach(function(r){
+      var roundRows = ROWS.filter(function(row){ return row.round === r; });
+      var count = roundRows.length;
+      if(state.progFilter === "complete"){
+        count = state.calculated ? roundRows.filter(function(row){ return computeRowResult(row).complete; }).length : 0;
+      } else if(state.progFilter === "incomplete"){
+        count = state.calculated ? roundRows.filter(function(row){ return !computeRowResult(row).complete; }).length : 0;
+      }
+      var quotaText = roundRows.length > 0 ? roundRows[0].quota : "";
+      var roundLabel = "รอบที่ 2 Quota " + quotaText + " (" + r + ")";
       var btn = document.createElement("button");
-      btn.textContent = "รอบ " + r;
+      btn.innerHTML = escapeHtml(roundLabel) + ' <span class="round-count">· ' + count + ' สาขา</span>';
       if(r === state.round) btn.classList.add("active");
       btn.addEventListener("click", function(){
         state.round = r;
+        state.progPage = 1;
+        state.facultyFilter = "";
+        // switching round clears the "programs of interest" comparison, since
+        // it was built around the previous round's selection
+        state.compare = [];
         saveState();
         renderRoundToggle();
+        renderProgFilterTabs();
+        renderFacultySelect();
         renderProgList();
         renderOverview();
+        renderCompare();
       });
       el.appendChild(btn);
     });
+  }
+
+  function renderProgFilterTabs(){
+    var el = document.getElementById("prog-filter-tabs");
+    if(!el) return;
+    el.innerHTML = "";
+    var inRound = ROWS.filter(function(r){ return r.round === state.round; });
+    var completeCount = 0, incompleteCount = 0;
+    if(state.calculated){
+      inRound.forEach(function(r){
+        if(computeRowResult(r).complete) completeCount++; else incompleteCount++;
+      });
+    }
+    var tabs = [
+      { key: "all", label: "ทุกสาขาวิชา", count: inRound.length },
+      { key: "complete", label: "คะแนนครบองค์ประกอบ", count: completeCount },
+      { key: "incomplete", label: "คะแนนไม่ครบองค์ประกอบ", count: incompleteCount }
+    ];
+    tabs.forEach(function(t){
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.setAttribute("data-filter", t.key);
+      if(t.key === state.progFilter) btn.classList.add("active");
+      btn.innerHTML = t.label + ' <span class="pf-count">(' + t.count + ')</span>';
+      btn.addEventListener("click", function(){
+        state.progFilter = t.key;
+        state.progPage = 1;
+        saveState();
+        renderRoundToggle();
+        renderProgFilterTabs();
+        renderProgList();
+      });
+      el.appendChild(btn);
+    });
+  }
+
+  function renderFacultySelect(){
+    var sel = document.getElementById("faculty-select");
+    if(!sel) return;
+    var faculties = [];
+    var minCode = {};
+    ROWS.forEach(function(r){
+      if(r.round !== state.round || !r.faculty) return;
+      if(faculties.indexOf(r.faculty) < 0){
+        faculties.push(r.faculty);
+        minCode[r.faculty] = r.code;
+      } else if(String(r.code).localeCompare(String(minCode[r.faculty]), undefined, { numeric: true, sensitivity: "base" }) < 0){
+        minCode[r.faculty] = r.code;
+      }
+    });
+    faculties.sort(function(a, b){
+      return String(minCode[a]).localeCompare(String(minCode[b]), undefined, { numeric: true, sensitivity: "base" });
+    });
+    if(state.facultyFilter && faculties.indexOf(state.facultyFilter) < 0){
+      state.facultyFilter = "";
+    }
+    sel.innerHTML = "";
+    var allOpt = document.createElement("option");
+    allOpt.value = "";
+    allOpt.textContent = "ทุกคณะ";
+    sel.appendChild(allOpt);
+    faculties.forEach(function(f){
+      var opt = document.createElement("option");
+      opt.value = f;
+      opt.textContent = f;
+      sel.appendChild(opt);
+    });
+    sel.value = state.facultyFilter;
   }
 
   // ---- render all-programs chance overview ----
@@ -1839,14 +2214,70 @@ window.__HISTORY__ = [{"round": 2.1, "year": 2566, "code": "0301", "name": "พ�
     });
   }
 
+  // ---- program list pagination ----
+  function getPageList(current, total){
+    var pages = [];
+    for(var i = 1; i <= total; i++){ pages.push(i); }
+    return pages;
+  }
+  function goToProgPage(p){
+    state.progPage = p;
+    renderProgList();
+    var listEl = document.getElementById("prog-list");
+    if(listEl && listEl.scrollIntoView) listEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+  function renderProgPagination(page, totalPages){
+    var el = document.getElementById("prog-pagination");
+    el.innerHTML = "";
+    if(totalPages <= 1) return;
+    var prevBtn = document.createElement("button");
+    prevBtn.type = "button";
+    prevBtn.textContent = "‹";
+    prevBtn.setAttribute("aria-label", "หน้าก่อนหน้า");
+    prevBtn.disabled = page <= 1;
+    prevBtn.addEventListener("click", function(){ goToProgPage(page - 1); });
+    el.appendChild(prevBtn);
+
+    getPageList(page, totalPages).forEach(function(p){
+      if(p === "..."){
+        var span = document.createElement("span");
+        span.className = "pg-ellipsis";
+        span.textContent = "…";
+        el.appendChild(span);
+        return;
+      }
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = String(p);
+      if(p === page){
+        btn.classList.add("active");
+        btn.setAttribute("aria-current", "page");
+      }
+      btn.addEventListener("click", function(){ goToProgPage(p); });
+      el.appendChild(btn);
+    });
+
+    var nextBtn = document.createElement("button");
+    nextBtn.type = "button";
+    nextBtn.textContent = "›";
+    nextBtn.setAttribute("aria-label", "หน้าถัดไป");
+    nextBtn.disabled = page >= totalPages;
+    nextBtn.addEventListener("click", function(){ goToProgPage(page + 1); });
+    el.appendChild(nextBtn);
+  }
+
   // ---- render program list ----
   function renderProgList(){
     var el = document.getElementById("prog-list");
     var hint = document.getElementById("prog-count-hint");
+    var pagEl = document.getElementById("prog-pagination");
     el.innerHTML = "";
     var q = state.search.trim().toLowerCase();
     var filtered = ROWS.filter(function(r){
       if(r.round !== state.round) return false;
+      if(state.progFilter === "complete" && (!state.calculated || !computeRowResult(r).complete)) return false;
+      if(state.progFilter === "incomplete" && (!state.calculated || computeRowResult(r).complete)) return false;
+      if(state.facultyFilter && r.faculty !== state.facultyFilter) return false;
       if(!q) return true;
       return (r.name && r.name.toLowerCase().indexOf(q) >= 0) ||
              (r.faculty && r.faculty.toLowerCase().indexOf(q) >= 0) ||
@@ -1855,15 +2286,36 @@ window.__HISTORY__ = [{"round": 2.1, "year": 2566, "code": "0301", "name": "พ�
     filtered.sort(function(a, b){
       return String(a.code).localeCompare(String(b.code), undefined, { numeric: true, sensitivity: "base" });
     });
+
+    // if the currently selected/displayed program no longer matches the active
+    // filters (search, faculty, round, complete/incomplete tab), clear it so the
+    // result panel doesn't keep showing a stale analysis for a hidden program
+    if(state.selected){
+      var stillVisible = filtered.some(function(r){
+        return r.round === state.selected.round && r.code === state.selected.code;
+      });
+      if(!stillVisible){
+        state.selected = null;
+        saveState();
+        renderResult();
+      }
+    }
+
     hint.textContent = filtered.length + " สาขา";
     if(filtered.length === 0){
       var empty = document.createElement("div");
       empty.className = "empty-note";
       empty.textContent = "ไม่พบสาขาวิชาที่ตรงกับคำค้นหา";
       el.appendChild(empty);
+      if(pagEl) pagEl.innerHTML = "";
       return;
     }
-    filtered.forEach(function(r){
+    var totalPages = Math.max(1, Math.ceil(filtered.length / PROG_PAGE_SIZE));
+    if(state.progPage < 1) state.progPage = 1;
+    if(state.progPage > totalPages) state.progPage = totalPages;
+    var start = (state.progPage - 1) * PROG_PAGE_SIZE;
+    var pageItems = filtered.slice(start, start + PROG_PAGE_SIZE);
+    pageItems.forEach(function(r){
       var item = document.createElement("div");
       item.className = "prog-item";
       if(state.selected && state.selected.round === r.round && state.selected.code === r.code){
@@ -1873,23 +2325,58 @@ window.__HISTORY__ = [{"round": 2.1, "year": 2566, "code": "0301", "name": "พ�
       main.className = "prog-item-main";
       var nameDiv = document.createElement("div");
       nameDiv.className = "pname";
-      nameDiv.innerHTML = '<span class="pcode">' + r.code + "</span> &nbsp;" + escapeHtml(r.name);
+      var nameHtml = '<span class="pcode">' + r.code + "</span> &nbsp;" + escapeHtml(r.name);
+
+      // once calculated, show an inline chance tag next to complete programs' names
+      var rowResult = computeRowResult(r);
+      if(state.calculated && rowResult.complete){
+        var hist = findHistory(r);
+        var verdict = hist.length > 0 ? overallVerdict(hist, rowResult.total) : { tier: null };
+        if(verdict.tier !== null){
+          nameHtml += ' <span class="pname-chance tier-' + verdict.tier + '">(' + TIER_LABELS[verdict.tier] + ' ประมาณ ' + fmtPct(verdict.percent) + '%)</span>';
+        }
+      }
+      nameDiv.innerHTML = nameHtml;
       var metaDiv = document.createElement("div");
       metaDiv.className = "pmeta";
       metaDiv.textContent = r.faculty + " · " + r.quota + " · แผนรับ (มคอ.) " + r.plan + " คน";
       main.appendChild(nameDiv);
       main.appendChild(metaDiv);
 
+      // once calculated, flag programs whose required score components aren't all filled in
+      var incomplete = state.calculated && !rowResult.complete;
+      if(incomplete){
+        var warnDiv = document.createElement("div");
+        warnDiv.className = "pmeta-warn";
+        var introSpan = document.createElement("span");
+        introSpan.textContent = "(คะแนนคุณไม่ครบตามองค์ประกอบของสาขาวิชากำหนด ขาดคะแนนวิชา";
+        warnDiv.appendChild(introSpan);
+        rowResult.missingKeys.forEach(function(k){
+          var chip = document.createElement("span");
+          chip.className = "missing-chip";
+          chip.textContent = LABELS[k] || k;
+          warnDiv.appendChild(chip);
+        });
+        var closeSpan = document.createElement("span");
+        closeSpan.textContent = ")";
+        warnDiv.appendChild(closeSpan);
+        main.appendChild(warnDiv);
+      }
+
       var pinned = isPinned(r);
       var pinBtn = document.createElement("button");
       pinBtn.type = "button";
       pinBtn.className = "pin-btn" + (pinned ? " pinned" : "");
-      var pinTip = pinned ? "เอาออกจากตารางเปรียบเทียบ" : "เพิ่มเข้าตารางเปรียบเทียบ (สูงสุด " + COMPARE_LIMIT + " สาขา)";
+      var pinTip = incomplete
+        ? "กรอกคะแนนให้ครบตามองค์ประกอบของสาขานี้ก่อนจึงจะเพิ่มเข้าตารางเปรียบเทียบได้"
+        : (pinned ? "เอาออกจากตารางเปรียบเทียบ" : "เพิ่มเข้าตารางเปรียบเทียบ (สูงสุด " + COMPARE_LIMIT + " สาขา)");
       pinBtn.setAttribute("aria-label", pinTip);
       pinBtn.title = pinTip;
+      if(incomplete) pinBtn.disabled = true;
       pinBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 3.2l2.75 5.77 6.25.82-4.55 4.36 1.2 6.15L12 17.3l-5.65 2.99 1.2-6.14-4.55-4.37 6.25-.82z" fill="' + (pinned ? "currentColor" : "none") + '" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
       pinBtn.addEventListener("click", function(e){
         e.stopPropagation();
+        if(incomplete) return;
         togglePin(r);
       });
 
@@ -1900,9 +2387,16 @@ window.__HISTORY__ = [{"round": 2.1, "year": 2566, "code": "0301", "name": "พ�
         saveState();
         renderProgList();
         renderResult();
+        var hasAnyScore = Object.keys(state.scores).length > 0;
+        if(!hasAnyScore){
+          showToast(buildNeedScoresToastHtml(r), { html: true, duration: 4500 });
+        } else if(!state.calculated){
+          showToast('กรุณากดปุ่ม "คำนวณ / วิเคราะห์ผล" ด้านล่าง เพื่อคำนวณคะแนนและวิเคราะห์โอกาส');
+        }
       });
       el.appendChild(item);
     });
+    renderProgPagination(state.progPage, totalPages);
   }
 
   // ---- compare list (up to COMPARE_LIMIT programs of interest, side by side) ----
@@ -1981,7 +2475,7 @@ window.__HISTORY__ = [{"round": 2.1, "year": 2566, "code": "0301", "name": "พ�
       html += '<tr class="' + (l.score === null ? "missing" : "") + '">';
       html += '<td>' + escapeHtml(LABELS[l.key] || l.key) + '</td>';
       html += '<td class="num"><span class="weight-pill">' + fmt(l.w) + '%</span></td>';
-      html += '<td class="num">' + (l.score === null ? "— ยังไม่กรอก" : fmt(l.score)) + '</td>';
+      html += '<td class="num">' + (l.score === null ? "ไม่มีคะแนน" : fmt(l.score)) + '</td>';
       html += '<td class="num">' + fmt(l.contrib) + '</td>';
       html += '</tr>';
     });
@@ -1994,6 +2488,20 @@ window.__HISTORY__ = [{"round": 2.1, "year": 2566, "code": "0301", "name": "พ�
     }
 
     return { html: html, total: total, missingCount: missingCount, usedCount: usedCount };
+  }
+
+  // small notice inserted above the breakdown table when the selected program's
+  // required score components aren't all filled in -- the calculation itself
+  // still runs and shows below, just from whatever scores are entered so far
+  function buildIncompleteNoticeHtml(rowResult){
+    var html = '<div class="incomplete-notice">';
+    html += '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.6"/><line x1="12" y1="7.5" x2="12" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="16.3" r="1.15" fill="currentColor"/></svg>';
+    html += '<div><span class="incomplete-notice-text">คะแนนคุณไม่ครบตามองค์ประกอบของสาขาวิชากำหนด ขาดคะแนนวิชา</span>';
+    rowResult.missingKeys.forEach(function(k){
+      html += ' <span class="missing-chip">' + escapeHtml(LABELS[k] || k) + '</span>';
+    });
+    html += '</div></div>';
+    return html;
   }
 
   function renderResult(){
@@ -2015,9 +2523,16 @@ window.__HISTORY__ = [{"round": 2.1, "year": 2566, "code": "0301", "name": "พ�
       return;
     }
 
+    var rowResult = computeRowResult(row);
     var b = buildBreakdownHtml(row);
-    body.innerHTML = b.html;
 
+    if(!rowResult.complete){
+      body.innerHTML = buildIncompleteNoticeHtml(rowResult) + b.html;
+      document.getElementById("history-card").hidden = true;
+      return;
+    }
+
+    body.innerHTML = b.html;
     renderHistory(row, b.total, b.usedCount > 0);
   }
 
@@ -2028,45 +2543,61 @@ window.__HISTORY__ = [{"round": 2.1, "year": 2566, "code": "0301", "name": "พ�
 
   // ---- decision tree diagram: how the tier classification is decided ----
   var TIER_STATUS_VAR = ["var(--st-critical)", "var(--st-serious)", "var(--st-warning)", "var(--st-good)"];
-  function buildDecisionTreeSVG(latest, youVal){
+  function buildDecisionTreeSVG(latest, youVal, overallTier){
     var hasThresholds = latest && latest.min !== null && latest.avg !== null && latest.max !== null;
-    var localTier = (hasThresholds && youVal !== null) ? classifyTier(youVal, latest.min, latest.avg, latest.max) : null;
+    // highlight the same tier as the "โอกาส..." badge above (the 4-year
+    // recency-weighted overall verdict), not a separate single-year figure --
+    // otherwise the two could disagree and confuse whoever is reading this
+    var localTier = (overallTier !== null && overallTier !== undefined) ? overallTier : null;
 
-    var W = 500, H = 320;
+    var W = 500, H = 340;
     var cx = 96, rx = 390;
     var yStart = 20, yD1 = 92, yD2 = 162, yD3 = 232, yL4 = 292;
     var boxW = 150, boxH = 30;
     var dHw = 76, dHh = 26;
     var leafW = 132, leafH = 32;
 
+    var activeColor = localTier !== null ? TIER_STATUS_VAR[localTier] : null;
+    var markerId = localTier !== null ? "dtree-arrow-t" + localTier : "dtree-arrow-a";
+
     function rectNode(x, y, w, h, active, tint){
       var cls = "dtree-node-stroke" + (active ? " active" : "");
-      var fillStyle = tint ? 'style="fill:var(--surface-2)"' : "";
-      return '<rect class="dtree-node-fill ' + cls + '" filter="url(#dtree-shadow)" x="' + (x - w/2) + '" y="' + (y - h/2) + '" width="' + w + '" height="' + h + '" rx="9" ' + fillStyle + ' />';
+      var styleParts = [];
+      if(tint) styleParts.push("fill:var(--surface-2)");
+      if(active && activeColor) styleParts.push("stroke:" + activeColor);
+      var styleAttr = styleParts.length ? ' style="' + styleParts.join(";") + '"' : "";
+      return '<rect class="dtree-node-fill ' + cls + '" filter="url(#dtree-shadow)" x="' + (x - w/2) + '" y="' + (y - h/2) + '" width="' + w + '" height="' + h + '" rx="9"' + styleAttr + ' />';
     }
     function diamondNode(x, y, hw, hh, active){
       var cls = "dtree-node-stroke" + (active ? " active" : "");
       var pts = [x + "," + (y-hh), (x+hw) + "," + y, x + "," + (y+hh), (x-hw) + "," + y].join(" ");
-      return '<polygon class="dtree-node-fill ' + cls + '" filter="url(#dtree-shadow)" style="fill:var(--surface-2)" points="' + pts + '" />';
+      var strokeStyle = (active && activeColor) ? (";stroke:" + activeColor) : "";
+      return '<polygon class="dtree-node-fill ' + cls + '" filter="url(#dtree-shadow)" style="fill:var(--surface-2)' + strokeStyle + '" points="' + pts + '" />';
     }
     function leafNode(x, y, w, h, tier, active){
-      var st = TIER_STATUS_VAR[tier];
-      var style = active
-        ? 'fill:' + st + ';fill-opacity:.24;stroke:' + st + ';stroke-width:2'
-        : 'fill:' + st + ';fill-opacity:.09;stroke:currentColor;stroke-width:1;opacity:.65';
+      var cls = "dtree-leaf-fill tier-" + tier + (active ? " active" : "");
       var filt = active ? ' filter="url(#dtree-shadow)"' : '';
-      return '<rect' + filt + ' x="' + (x - w/2) + '" y="' + (y - h/2) + '" width="' + w + '" height="' + h + '" rx="8" style="' + style + '" />';
+      var s = '<rect class="' + cls + '"' + filt + ' x="' + (x - w/2) + '" y="' + (y - h/2) + '" width="' + w + '" height="' + h + '" rx="8" />';
+      if(active){
+        // extra outer ring, a touch bigger than the box, to read as a clear
+        // colored frame around the result even at a glance / small crop
+        var pad = 4;
+        s += '<rect class="dtree-leaf-ring" style="fill:none;stroke:' + TIER_STATUS_VAR[tier] + '" x="' + (x - w/2 - pad) + '" y="' + (y - h/2 - pad) + '" width="' + (w + pad*2) + '" height="' + (h + pad*2) + '" rx="' + (8+pad) + '" />';
+      }
+      return s;
     }
     function vEdge(x, y1, y2, active, label){
       var cls = "dtree-edge" + (active ? " active" : "");
-      var s = '<line class="' + cls + '" x1="' + x + '" y1="' + y1 + '" x2="' + x + '" y2="' + (y2-7) + '" marker-end="url(#dtree-arrow' + (active?"-a":"") + ')" />';
-      if(label) s += '<text class="dtree-edge-label" x="' + (x+8) + '" y="' + ((y1+y2)/2+3) + '">' + label + '</text>';
+      var styleAttr = (active && activeColor) ? ' style="stroke:' + activeColor + '"' : "";
+      var s = '<line class="' + cls + '"' + styleAttr + ' x1="' + x + '" y1="' + y1 + '" x2="' + x + '" y2="' + (y2-7) + '" marker-end="url(#' + (active?markerId:"dtree-arrow") + ')" />';
+      if(label) s += '<text class="dtree-edge-label' + (active?" active":"") + '" x="' + (x+8) + '" y="' + ((y1+y2)/2+3) + '">' + label + '</text>';
       return s;
     }
     function hEdge(x1, y, x2, active, label){
       var cls = "dtree-edge" + (active ? " active" : "");
-      var s = '<line class="' + cls + '" x1="' + x1 + '" y1="' + y + '" x2="' + (x2-7) + '" y2="' + y + '" marker-end="url(#dtree-arrow' + (active?"-a":"") + ')" />';
-      if(label) s += '<text class="dtree-edge-label" x="' + ((x1+x2)/2) + '" y="' + (y-6) + '" text-anchor="middle">' + label + '</text>';
+      var styleAttr = (active && activeColor) ? ' style="stroke:' + activeColor + '"' : "";
+      var s = '<line class="' + cls + '"' + styleAttr + ' x1="' + x1 + '" y1="' + y + '" x2="' + (x2-7) + '" y2="' + y + '" marker-end="url(#' + (active?markerId:"dtree-arrow") + ')" />';
+      if(label) s += '<text class="dtree-edge-label' + (active?" active":"") + '" x="' + ((x1+x2)/2) + '" y="' + (y-6) + '" text-anchor="middle">' + label + '</text>';
       return s;
     }
 
@@ -2080,17 +2611,29 @@ window.__HISTORY__ = [{"round": 2.1, "year": 2566, "code": "0301", "name": "พ�
     var maxTxt = hasThresholds ? fmt(latest.max) : "—";
 
     var TIER_GLYPH = ["●", "◐", "○", "◎"];
-    function leafLabel(x, y, tier, active){
-      var st = TIER_STATUS_VAR[tier];
-      var s = '<text class="dtree-leaf-glyph" x="' + (x - leafW/2 + 16) + '" y="' + (y+4) + '" text-anchor="middle" style="fill:' + st + '">' + TIER_GLYPH[tier] + '</text>';
-      s += '<text class="dtree-leaf-label' + (active?" active":"") + '" x="' + (x+8) + '" y="' + (y+4) + '" text-anchor="middle" style="fill:' + st + '">' + TIER_LABELS[tier] + '</text>';
+    var TIER_CHECK = "✓";
+    function leafLabel(x, y, tier, active, tagBelow){
+      var glyphTxt = active ? TIER_CHECK : TIER_GLYPH[tier];
+      var glyphCls = "dtree-leaf-glyph" + (active ? " active tier-" + tier + "-text" : "");
+      var labelCls = "dtree-leaf-label" + (active ? " active tier-" + tier + "-text" : "");
+      var s = '<text class="' + glyphCls + '" x="' + (x - leafW/2 + 16) + '" y="' + (y+4) + '" text-anchor="middle">' + glyphTxt + '</text>';
+      s += '<text class="' + labelCls + '" x="' + (x+8) + '" y="' + (y+4) + '" text-anchor="middle">' + TIER_LABELS[tier] + '</text>';
+      if(active){
+        // the bottom (vertical-stem) leaf shares its x with the "ไม่" edge label
+        // above it, so its tag goes below the box instead, to avoid overlapping
+        var tagY = tagBelow ? (y + leafH/2 + 16) : (y - (leafH/2 + 10));
+        var tagGlyph = tagBelow ? "▲" : "▼";
+        s += '<text class="dtree-result-tag tier-' + tier + '-text" x="' + (x+8) + '" y="' + tagY + '" text-anchor="middle">' + tagGlyph + ' ผลลัพธ์ของคุณ</text>';
+      }
       return s;
     }
 
-    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="แผนภาพต้นไม้แสดงเกณฑ์การตัดสินระดับโอกาสสอบติด โดยเทียบคะแนนรวมกับ MIN, AVG และ MAX ของปี ' + (latest?latest.year:"") + '">';
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="แผนภาพต้นไม้แสดงหลักเกณฑ์การเทียบคะแนนรวมกับ MIN, AVG และ MAX (ตัวอย่างจากปี ' + (latest?latest.year:"") + ') โดยผลลัพธ์ที่เน้นสีคือระดับโอกาสรวม 4 ปีย้อนหลังแบบเดียวกับป้ายด้านบน">';
     svg += '<defs>';
-    svg += '<marker id="dtree-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><polygon points="0,0 7,3 0,6" style="fill:currentColor;opacity:.5" /></marker>';
-    svg += '<marker id="dtree-arrow-a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><polygon points="0,0 7,3 0,6" style="fill:var(--accent)" /></marker>';
+    svg += '<marker id="dtree-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><polygon points="0,0 7,3 0,6" style="fill:currentColor;opacity:.4" /></marker>';
+    TIER_STATUS_VAR.forEach(function(col, i){
+      svg += '<marker id="dtree-arrow-t' + i + '" markerWidth="9" markerHeight="9" refX="6.5" refY="3.5" orient="auto"><polygon points="0,0 8,3.5 0,7" style="fill:' + col + '" /></marker>';
+    });
     svg += '<filter id="dtree-shadow" x="-40%" y="-60%" width="180%" height="220%"><feDropShadow dx="0" dy="1" stdDeviation="1.4" flood-opacity="0.16" /></filter>';
     svg += '</defs>';
 
@@ -2132,11 +2675,11 @@ window.__HISTORY__ = [{"round": 2.1, "year": 2566, "code": "0301", "name": "พ�
     svg += leafLabel(rx, yD3, 2, a3yes);
 
     svg += leafNode(cx, yL4, boxW, leafH, 3, a3no);
-    svg += leafLabel(cx, yL4, 3, a3no);
+    svg += leafLabel(cx, yL4, 3, a3no, true);
 
     svg += '</svg>';
 
-    var cap = 'เกณฑ์เทียบคะแนนรวมกับ MIN/AVG/MAX ของปี ' + (latest?latest.year:"ล่าสุด") + ' (ปีล่าสุดที่มีข้อมูล) — ผลรวม 4 ปีที่ให้น้ำหนักปีล่าสุดมากกว่าคือค่าที่ใช้สรุปเป็นป้ายผลด้านบน';
+    var cap = 'แผนภาพนี้แสดงหลักเกณฑ์การเทียบคะแนนกับ MIN/AVG/MAX โดยใช้ตัวเลขของปี ' + (latest?latest.year:"ล่าสุด") + ' (ปีล่าสุดที่มีข้อมูล) เป็นตัวอย่างประกอบ — ส่วนใบไม้ (ผลลัพธ์) ที่ถูกเน้นสีนั้นคือระดับโอกาสแบบเดียวกับป้ายด้านบน ซึ่งคำนวณจากข้อมูลถ่วงน้ำหนัก 4 ปีย้อนหลัง (ให้น้ำหนักปีล่าสุดมากกว่า) จึงอาจไม่ตรงกับผลเทียบเฉพาะปี ' + (latest?latest.year:"ล่าสุด") + ' ปีเดียวเสมอไป';
     return '<figure class="dtree-figure"><div class="chart-wrap">' + svg + '</div><figcaption class="dtree-caption">' + escapeHtml(cap) + '</figcaption></figure>';
   }
 
@@ -2309,7 +2852,7 @@ window.__HISTORY__ = [{"round": 2.1, "year": 2566, "code": "0301", "name": "พ�
     // collapsible decision tree diagram
     var latest = hist[hist.length - 1];
     html += '<button class="table-toggle js-tree-toggle" type="button"><span class="arrow">▶</span> ดูแผนภาพต้นไม้การตัดสินโอกาส</button>';
-    html += '<div class="js-tree-wrap" hidden>' + buildDecisionTreeSVG(latest, youVal) + '</div>';
+    html += '<div class="js-tree-wrap" hidden>' + buildDecisionTreeSVG(latest, youVal, verdict.tier) + '</div>';
 
     // collapsible data table
     html += '<button class="table-toggle js-table-toggle" type="button"><span class="arrow">▶</span> ดูตารางข้อมูล</button>';
@@ -2460,8 +3003,39 @@ window.__HISTORY__ = [{"round": 2.1, "year": 2566, "code": "0301", "name": "พ�
   // ---- search wiring ----
   document.getElementById("prog-search").addEventListener("input", function(e){
     state.search = e.target.value;
+    state.progPage = 1;
     renderProgList();
   });
+
+  document.getElementById("faculty-select").addEventListener("change", function(e){
+    state.facultyFilter = e.target.value;
+    state.progPage = 1;
+    saveState();
+    renderProgList();
+  });
+
+  document.getElementById("clear-filter-btn").addEventListener("click", function(){
+    state.search = "";
+    state.facultyFilter = "";
+    state.progFilter = "all";
+    state.progPage = 1;
+    saveState();
+    document.getElementById("prog-search").value = "";
+    renderRoundToggle();
+    renderProgFilterTabs();
+    renderFacultySelect();
+    renderProgList();
+  });
+
+  var compareClearBtnEl = document.getElementById("compare-clear-btn");
+  if(compareClearBtnEl){
+    compareClearBtnEl.addEventListener("click", function(){
+      state.compare = [];
+      saveState();
+      renderCompare();
+      renderProgList();
+    });
+  }
 
   // ---- clear all (two-step confirm, no native dialog) ----
   (function wireClearBtn(){
@@ -2485,10 +3059,17 @@ window.__HISTORY__ = [{"round": 2.1, "year": 2566, "code": "0301", "name": "พ�
       state.selected = null;
       state.search = "";
       state.calculated = false;
+      state.compare = [];
+      state.progPage = 1;
+      state.round = rounds[0];
+      state.facultyFilter = "";
       try{ localStorage.removeItem("tcas-calc-state"); }catch(e){ /* ignore */ }
 
       document.getElementById("prog-search").value = "";
       renderScoreForm();
+      renderRoundToggle();
+      renderProgFilterTabs();
+      renderFacultySelect();
       renderProgList();
       renderResult();
       renderOverview();
@@ -2513,6 +3094,40 @@ window.__HISTORY__ = [{"round": 2.1, "year": 2566, "code": "0301", "name": "พ�
       btn.classList.remove("stale");
       note.textContent = "กรอกคะแนนที่มีให้ครบตามที่ต้องการ แล้วกดปุ่มนี้เพื่อคำนวณคะแนนรวมและวิเคราะห์โอกาส (แก้ไขคะแนนภายหลังต้องกดคำนวณใหม่)";
     }
+  }
+  // brief bottom nudge, e.g. reminding the visitor to press the calculate button
+  var toastTimer = null;
+  function showToast(message, opts){
+    var toast = document.getElementById("toast");
+    if(!toast) return;
+    opts = opts || {};
+    if(opts.html){
+      toast.innerHTML = message;
+      toast.classList.add("toast-rich");
+    } else {
+      toast.textContent = message;
+      toast.classList.remove("toast-rich");
+    }
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){
+      toast.classList.remove("show");
+    }, opts.duration || 3200);
+  }
+  function buildNeedScoresToastHtml(row){
+    var usedKeys = [];
+    SUBJECTS.forEach(function(key, idx){
+      if((row.w[idx] || 0) > 0) usedKeys.push(key);
+    });
+    var html = '<div class="toast-title">กรุณากรอกคะแนนเพื่อทำการคำนวณ/วิเคราะห์ผล</div>';
+    html += '<div class="toast-prog">' + escapeHtml(String(row.code)) + ' ' + escapeHtml(row.name) + '</div>';
+    html += '<div class="toast-subjects-label">องค์ประกอบคะแนนที่ใช้ในการคำนวณ:</div>';
+    html += '<div class="toast-chips">';
+    usedKeys.forEach(function(k){
+      html += '<span class="toast-chip">' + escapeHtml(LABELS[k] || k) + '</span>';
+    });
+    html += '</div>';
+    return html;
   }
   // shows a ~2s circular progress animation, then runs the callback once it completes
   function runCalcLoading(durationMs, onDone){
@@ -2551,11 +3166,33 @@ window.__HISTORY__ = [{"round": 2.1, "year": 2566, "code": "0301", "name": "พ�
   (function wireCalcBtn(){
     var btn = document.getElementById("calc-btn");
     btn.addEventListener("click", function(){
+      if(Object.keys(state.scores).length === 0){
+        showToast("คุณยังไม่กรอกคะแนน !");
+        return;
+      }
+      // clear any previously calculated results right away so stale numbers
+      // aren't left showing while the new calculation is in progress
+      state.calculated = false;
+      renderRoundToggle();
+      renderProgFilterTabs();
+      renderProgList();
+      renderResult();
+      renderOverview();
+      renderCompare();
       btn.disabled = true;
       runCalcLoading(2000, function(){
         btn.disabled = false;
         state.calculated = true;
+        // programs pinned earlier that turn out not to have every required
+        // score component filled in no longer qualify for comparison
+        state.compare = state.compare.filter(function(c){
+          var row = ROWS.find(function(r){ return r.round === c.round && r.code === c.code; });
+          return row && computeRowResult(row).complete;
+        });
         saveState();
+        renderRoundToggle();
+        renderProgFilterTabs();
+        renderProgList();
         renderResult();
         renderOverview();
         renderCompare();
@@ -2598,6 +3235,8 @@ window.__HISTORY__ = [{"round": 2.1, "year": 2566, "code": "0301", "name": "พ�
   loadSaved();
   renderScoreForm();
   renderRoundToggle();
+  renderProgFilterTabs();
+  renderFacultySelect();
   renderProgList();
   renderResult();
   renderOverview();
