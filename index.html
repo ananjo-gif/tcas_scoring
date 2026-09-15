@@ -713,6 +713,11 @@
     font-weight:500;
     opacity:.75;
   }
+  @media (max-width:480px){
+    .round-toggle{ gap:6px; }
+    .round-toggle button{ font-size:11.5px; padding:8px 6px; line-height:1.3; }
+    .round-count{ font-size:10px; }
+  }
 
   .prog-filter-tabs{
     display:flex;
@@ -939,7 +944,26 @@
     color:var(--ink-dim);
     font-variant-numeric:tabular-nums;
   }
-  .table-wrap{ overflow-x:auto; }
+  .table-wrap{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    /* scroll-shadow hint: a soft fade appears on whichever edge still has
+       more content, and disappears once you've scrolled all the way there --
+       pure CSS, so it stays correct without any JS wiring */
+    background:
+      linear-gradient(to right, var(--surface) 50%, rgba(0,0,0,0) 100%) 0 0,
+      linear-gradient(to left, var(--surface) 50%, rgba(0,0,0,0) 100%) 100% 0,
+      radial-gradient(ellipse at left, rgba(0,0,0,.14), rgba(0,0,0,0) 70%) 0 0,
+      radial-gradient(ellipse at right, rgba(0,0,0,.14), rgba(0,0,0,0) 70%) 100% 0;
+    background-repeat:no-repeat;
+    background-size:24px 100%, 24px 100%, 12px 100%, 12px 100%;
+    background-attachment:local, local, scroll, scroll;
+  }
+  @media (max-width:480px){
+    table.breakdown, table.history{ font-size:11.5px; }
+    table.breakdown th, table.breakdown td, table.history th, table.history td{ padding:6px 5px; }
+    table.breakdown tfoot td{ font-size:12.5px; }
+  }
 
   .flag{
     display:inline-flex;
@@ -1205,6 +1229,15 @@
   .verdict .v-percent .num{ font-size:26px; font-weight:700; line-height:1; }
   .verdict .v-percent .pct{ font-size:15px; font-weight:700; }
   .verdict .v-percent .cap{ font-size:10.5px; font-weight:500; color:var(--ink-dim); margin-top:3px; }
+  @media (max-width:480px){
+    /* the label ("โอกาสปานกลาง" etc.) has no spaces for the browser to break
+       on, so squeezed between the icon and the percent it wraps one syllable
+       per line -- give it the full row instead and keep icon+percent together
+       on the line above */
+    .verdict{ flex-wrap:wrap; row-gap:6px; }
+    .verdict .v-text{ order:3; flex-basis:100%; }
+    .verdict .v-percent{ margin-left:auto; }
+  }
   .verdict.tier-0{ background:color-mix(in srgb, var(--st-critical) 12%, var(--surface)); border-color:color-mix(in srgb, var(--st-critical) 35%, transparent); }
   .verdict.tier-1{ background:color-mix(in srgb, var(--st-serious) 12%, var(--surface)); border-color:color-mix(in srgb, var(--st-serious) 35%, transparent); }
   .verdict.tier-2{ background:color-mix(in srgb, var(--st-warning) 14%, var(--surface)); border-color:color-mix(in srgb, var(--st-warning) 40%, transparent); }
